@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Configuration>
+	<ViewDefinitions>
+		<View>
+			<Name>Worklog</Name>
+			<ViewSelectedBy>
+				<TypeName>Worklog</TypeName>
+			</ViewSelectedBy>
+			<GroupBy>
+				<ScriptBlock>$_.Started.ToString('MMMM yyyy',[cultureinfo]::invariantculture)</ScriptBlock>
+				<Label>Month</Label>
+			</GroupBy>
+			<TableControl>
+				<TableHeaders>
+					<TableColumnHeader>
+						<Label>Issue Key</Label>
+						<Width>12</Width>
+					</TableColumnHeader>
+					<TableColumnHeader>
+						<Label>Issue Summary</Label>
+						<Width>35</Width>
+					</TableColumnHeader>
+					<TableColumnHeader>
+						<Label>Comment</Label>
+					</TableColumnHeader>
+					<TableColumnHeader>
+						<Label>Author</Label>
+						<Width>10</Width>
+						<Alignment>Center</Alignment>
+					</TableColumnHeader>
+					<TableColumnHeader>
+						<Label>Created</Label>
+						<Width>10</Width>
+						<Alignment>Left</Alignment>
+					</TableColumnHeader>
+					<TableColumnHeader>
+						<Label>Started</Label>
+						<Width>10</Width>
+						<Alignment>Center</Alignment>
+					</TableColumnHeader>
+					<TableColumnHeader>
+						<Label>TimeSpent</Label>
+						<Width>10</Width>
+						<!-- <Width>10</Width> -->
+						<Alignment>Right</Alignment>
+					</TableColumnHeader>
+				</TableHeaders>
+				<TableRowEntries>
+					<TableRowEntry>
+						<TableColumnItems>
+							<TableColumnItem>
+								<ScriptBlock>$_.Issue.Key</ScriptBlock>
+							</TableColumnItem>
+							<TableColumnItem>
+								<ScriptBlock>$_.Issue.Summary</ScriptBlock>
+							</TableColumnItem>
+							<TableColumnItem>
+								<ScriptBlock>$_.Comment</ScriptBlock>
+							</TableColumnItem>
+							<TableColumnItem>
+								<ScriptBlock>$_.Author.ID</ScriptBlock>
+							</TableColumnItem>
+							<TableColumnItem>
+								<ScriptBlock>$_.Created.Tostring('dd-MM-yyyy')</ScriptBlock>
+							</TableColumnItem>
+							<TableColumnItem>
+								<ScriptBlock>$_.Started.Tostring('dd-MM-yyyy')</ScriptBlock>
+							</TableColumnItem>
+							<TableColumnItem>
+								<ScriptBlock>
+									[int]$h = [math]::floor($_.TimeSpent.TotalHours);
+									$format = $_.TimeSpent.tostring('\:mm\:ss');
+									$h.tostring()+$format
+								</ScriptBlock>
+							</TableColumnItem>
+						</TableColumnItems>
+					</TableRowEntry>
+				</TableRowEntries>
+			</TableControl>
+		</View>
+	</ViewDefinitions>
+</Configuration>

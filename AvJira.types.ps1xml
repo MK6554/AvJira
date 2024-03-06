@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Types>
+    <Type>
+        <Name>Issue</Name>
+        <Members>
+            <AliasProperty>
+                <Name>Summary</Name>
+                <ReferencedMemberName>Name</ReferencedMemberName>
+            </AliasProperty>
+            <ScriptProperty>
+                <Name>FullName</Name>
+                <GetScriptBlock>
+                    $this.Key + ' ' + $this.Name
+                </GetScriptBlock>
+            </ScriptProperty>
+            <ScriptProperty>
+                <Name>TimeSpentSeconds</Name>
+                <GetScriptBlock>
+                    $this.TimeSpent.TotalSeconds
+                </GetScriptBlock>
+            </ScriptProperty>
+            <ScriptProperty>
+                <Name>TimeSpentAggregateSeconds</Name>
+                <GetScriptBlock>
+                    $this.TimeSpentAggregate.TotalSeconds
+                </GetScriptBlock>
+            </ScriptProperty>
+        </Members>
+    </Type>
+    <Type>
+        <Name>SummedWorklog</Name>
+        <Members>
+            <ScriptProperty>
+                <Name>FullName</Name>
+                <GetScriptBlock>
+                    $this.Key + ' ' + $this.Name
+                </GetScriptBlock>
+            </ScriptProperty>
+        </Members>
+    </Type>
+    <Type>
+        <Name>Worklog</Name>
+        <Members>
+            <ScriptProperty>
+                <Name>TimeSpentSeconds</Name>
+                <GetScriptBlock>
+                    $this.TimeSpent.TotalSeconds
+                </GetScriptBlock>
+            </ScriptProperty>
+        </Members>
+    </Type>
+</Types>
