@@ -1,0 +1,57 @@
+TOPIC
+    about_AvJira
+
+SHORT DESCRIPTION
+    Module that makes it easier to fetch data from Jira.
+
+LONG DESCRIPTION
+    The module automates parsing work logs and issues. It also allows adding new work logs.
+    
+    By default the module will require providing password and username for each session (until PowerShell is closed) on first command.
+    
+    It is possible to store credentials in an ENCRYPTED file - use command Set-AvJiraCredentials.
+    After that data from this file will be used for logging in.
+    If you change your password run the command again.
+
+    It is recommended to put the results into a variables, like this:
+    $logs = Get-AvJiraWorkLog
+    This way the logs will be stored there, and you will be able to access them without connecting to the Jira server.
+
+
+EXAMPLES
+    Objects in brackets are optional
+    Get-AvJiraWorkLog
+        returns logs from this month for the logged in user
+
+    Get-AvJiraWorkLog [-Period] LastMonth
+        returns logs from last month for the logged in user
+
+    Get-AvJiraWorkLog [-Period] LastMonth -User
+        returns logs from last month for the provided user
+
+    Get-AvJiraWorkLog -Issue AAA-BBB, CCC-DDD
+        returns worklogs from the specified issues
+
+    More info -> Get-Help Get-AvJiraWorkLog
+    ---------------------------------------
+    Get-AvJiraIssue [-Issue]  AAA-BBB, CCC-DDD
+        returns specified issues (which include worklogs)
+
+    Get-AvJiraIssue -Query "<Jira Query>" 
+        returns issues (with worklogs) matching the query. You can limit results to status and user with parameters -user and -status
+
+    More info -> Get-Help Get-AvJiraWorkLog
+    ---------------------------------------
+    You can use Get-AvJiraWorklogSum to sum up the time of all given logs.
+    Its alias is AvJiraLogSum. To use it properly you should know how pipeline works in PowerShell.
+
+    Worklogs and issues are standard objects. You can filter the manually using Where-Object (?).
+    Get-AvJiraWorkLog | Where-object TimespentSeconds -gt 3600
+        Returns logs where time spent is larger than 1 hour
+
+
+KEYWORDS
+    Jira, Worklog
+
+SEE ALSO
+    https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_pipelines

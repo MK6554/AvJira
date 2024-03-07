@@ -45,7 +45,12 @@ class Issue {
         $this.Key = $jiraIssueObject.Key
         $this.Name = $jiraIssueObject.Summary
         $this.Link = [uri]::new($jiraIssueObject.HttpUrl)
-        $this.Worklogs = $jiraIssueObject.worklog.worklogs | ForEach-Object { [Worklog]::new($_, $this) }
+        $maxWorkLogs = $jiraIssueObject.worklog.Total
+        $this.Worklogs = Get-JiraIssueWorklog -Issue $this.Key | Select-Object -First $maxWorkLogs | ForEach-Object { $i = 0 } {
+            Write-Progress -Activity 'Parsing worklogs...' -Status $_.Created -Id 2137 -ParentId 420 -PercentComplete ($i / $maxWorkLogs * 100)
+            $i++
+            [Worklog]::new($_, $this) }
+        Write-Progress -Activity 'Parsing worklogs...' -Status 'Done' -Id 2137 -Completed
     }
     [Worklog[]] FilterLogsByDate([datetime]$startDate, [datetime]$endDate, [string[]]$user = $null) {
         if ($user.Length -gt 1) {

@@ -5,8 +5,8 @@ function Get-Issue {
 .DESCRIPTION
     Returns issues matching the given criteria: ID or Jira Query.
 .EXAMPLE
-    Test-MyTestFunction -Verbose
-    Explanation of the function or its result. You can include multiple examples with additional .EXAMPLE lines
+    Get-Issue [-Issue]  AAA-BBB, CCC-DDD
+    returns specified issues (which include worklogs)
 .PARAMETER Issue
     ID of issue. Can specify multiple, separated with a comma
 .PARAMETER Query
@@ -46,23 +46,29 @@ function Get-Issue {
         $parts = $addParts | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
         $final_query = $parts -join ' AND '
         Write-Verbose $final_query
-        Get-JiraIssue -Query $final_query | ForEach-Object { [Issue]::new($_) } 
+        Get-JiraIssue -Query $final_query | ForEach-Object { 
+            Write-Progress -Activity 'Parsing projects...' -Status $_.Key -Id 420
+            [Issue]::new($_)
+        } 
+        Write-Progress -Activity 'Parsing projects...' -Status 'Done' -Id 1 -Completed
     }
 }
 
 function Get-Worklog {
     <#
     .SYNOPSIS
-        A short one-line action-based description, e.g. 'Tests if a function is valid'
+        Returns worklogs from the given period or issue
     .DESCRIPTION
-        A longer description of the function, its purpose, common use cases, etc.
-    .NOTES
-        Information or caveats about the function e.g. 'This function is not supported in Linux'
-    .LINK
-        Specify a URI to a help page, this will show when Get-Help -Online is used.
+        Returns worklogs which are either from the given period or from specified issues.
+    .PARAMETER Period
+        Period of time from which logs should be fetched
+    .PARAMETER User
+        Optional user name to limit worklogs to.
+    .PARAMETER Issue
+        Isue from which the logs will be fetched. Cannot be used with -Period.
     .EXAMPLE
-        Test-MyTestFunction -Verbose
-        Explanation of the function or its result. You can include multiple examples with additional .EXAMPLE lines
+        Get-AvJiraWorkLog [-Period] LastMonth
+        returns logs from last month for the logged in user
     #>
     [CmdletBinding(DefaultParameterSetName = 'PERIOD')]
     param (
@@ -113,6 +119,15 @@ function Get-Worklog {
 }
 
 function Get-WorklogSum {
+    <#
+    .SYNOPSIS
+        Sums given logs up.
+    .DESCRIPTION
+        Return total time spent from given logs. This cmdlet should be used in pipeline (with the | operator)
+    .EXAMPLE
+        get-avjiraworklog | avjiralogsum
+    #>
+    
     [CmdletBinding()]
     param (
         [Parameter(ValueFromPipeline, ValueFromPipelineByPropertyName)]
@@ -128,9 +143,15 @@ function Get-WorklogSum {
         }
     }
     end {
-        [SummedWorklogs]::new($logs.Toarray())
+        $s = [SummedWorklogs]::new($logs.Toarray())
+        [PSCustomObject][ordered]@{
+            LogCount  = $s.Worklogs.count
+            Issues    = $s.Issue.Count
+            TotalTime = $s.TimeSpentTotal
+        }
     }
 }
+Set-Alias -Name logsum -Value Get-WorklogSum
 
 function Add-Worklog {
     [CmdletBinding()]
@@ -205,7 +226,8 @@ function Set-Credentials {
     param (    )
     $Username = Read-Host 'Enter username'
     $ApiKey = Read-Host 'Enter password or API key' -AsSecureString
-    $apikey = ConvertFrom-SecureString $ApiKey -AsPlainText
+    $creds = New-Object System.Management.Automation.PSCredential($username, $ApiKey)
+    $apikey = $creds.GetNetworkCredential().Password
     $cert = Get-ChildItem Cert:\CurrentUser\My -DnsName $CertificateName
     if (-not $cert) {
         $cert = New-SelfSignedCertificate -DnsName $CertificateName -CertStoreLocation 'Cert:\CurrentUser\My' -KeyUsage KeyEncipherment, DataEncipherment, KeyAgreement -Type DocumentEncryptionCert -Verbose
@@ -238,14 +260,16 @@ function Test-Session {
 }
 
 $CertificateName = 'AvJiraEncrytingCertificate'
-$EncryptedApiPath = "$PSScriptRoot/JiraApi$($env:USERNAME).cms"
+$EncryptedApiFileName = "JiraApi$($env:USERNAME).cms"
 $Separator = ';;;;____;;;;'
 
 function LoadApiKey {
-    if (-not (Test-Path $EncryptedApiPath)) { return }
+    $versionFolder = Join-Path $PSScriptRoot '..'
+    $key = Get-ChildItem $versionFolder -Recurse -Filter $EncryptedApiFileName -Depth 1 | Sort-Object LastWriteTime | Select-Object -First 1
+    if (-not $key) { return }
     $cert = Get-ChildItem Cert:\CurrentUser\My -DnsName $CertificateName
     if (-not $cert) { return }
-    Unprotect-CmsMessage -Path $EncryptedApiPath
+    Unprotect-CmsMessage -Path $key.FullName
 }
 
 function GetQuery {

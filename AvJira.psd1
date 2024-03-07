@@ -12,7 +12,7 @@
     RootModule           = 'AvJira.psm1'
 
     # Version number of this module.
-    ModuleVersion        = '0.8.6'
+    ModuleVersion        = '0.8.14'
 
     # Supported PSEditions
     # CompatiblePSEditions = @()
@@ -69,7 +69,7 @@
     # NestedModules = @()
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-    FunctionsToExport    = 'Get-Worklog', 'Add-Worklog', 'Test-Session', 'Set-Credential', 'Get-Issue','Get-WorklogSum'
+    FunctionsToExport    = 'Get-Worklog', 'Add-Worklog', 'Test-Session', 'Set-Credentials', 'Get-Issue','Get-WorklogSum'
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport      = '*'
@@ -78,7 +78,7 @@
     VariablesToExport    = '*'
 
     # Aliases to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no aliases to export.
-    AliasesToExport      = '*'
+    AliasesToExport      = 'logsum'
 
     # DSC resources to export from this module
     # DscResourcesToExport = @()
