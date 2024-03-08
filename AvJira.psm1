@@ -96,7 +96,7 @@ function Get-Worklog {
             $msg = if (@($issue).Count -eq 1) { "Issue $issue could not be found" } else { "Issues $issue could not be found" }
             Write-Error $msg -ErrorAction Stop
         }
-        $foundIssue | Sort-Object Started
+        $foundIssue | ForEach-Object Worklogs | Sort-Object Started
     } else {
         #periodMode
         $query, $startDate, $endDate = GetQuery $period
@@ -211,15 +211,15 @@ function Add-Worklog {
         Comment     = $Comment
         Issue       = $Issue
         TimeSpent   = $Time
-        DateStarted = $date.ToString('yyyy-MM-dd')
+        DateStarted = $date
     }
+    $logDisplay = $log.Clone()
+    $logDisplay['TimeSpent'] = $Time.tostring('hh\h\ mm\m')
     Write-Host 'Log to add:'
-    ([pscustomobject]$log) | Out-String
+    ([pscustomobject]$logDisplay) | Out-String
     Read-Host 'Press ENTER to add or CTRL-Z to cancel'
     Add-JiraIssueWorklog @log  
 }
-
-
 
 function Set-Credentials {
     [CmdletBinding()]
@@ -238,8 +238,23 @@ function Set-Credentials {
     $msg = "$username$Separator$apikey"
     $msg | Protect-CmsMessage -To "cn=$CertificateName" -OutFile $EncryptedApiPath -Verbose
 }
-
+$script:OutdatedVersionOnPurpose = $false
 function Test-Session {
+    if (-not $OutdatedVersionOnPurpose) {
+        Write-Verbose 'Looking for module updates.'
+        $currentModule = Get-Module avjira -Verbose:$false
+        $newestModule = Find-Module avjira -Repository 'PowershellSupportRepository' -Verbose:$false
+        if ($newestModule.Version -gt $currentModule.Version) {
+            Write-Warning "Updates to AvJira detected ($($currentModule.Version) -> $($newestModule.Version)). Starting update..."
+            Update-Module AvJira -ea SilentlyContinue -Verbose:$false
+            Write-Warning 'Update complete. You will still use the old version until PowerShell is restarted.'
+            $script:OutdatedVersionOnPurpose = $true
+        }else{
+            Write-Verbose "No updates found."
+        }
+    } else {
+        Write-Verbose 'Skipped update check - using outdated version.'
+    }
     if (-not (Get-JiraConfigServer)) {
         Write-Warning 'Jira server is not configured!'
         $address = Read-Host 'Enter Jira server address (https://jira.[company].com)'

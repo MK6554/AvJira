@@ -7,11 +7,9 @@ class JiraTimeSpanConverterAttribute:System.Management.Automation.ArgumentTransf
             return [timespan]::FromMinutes($inputData)
         } elseif ($inputData -is [string]) {
             [string[]]$formats = @(
-                'hh\:mm\:ss', 
-                'hhmmss', 
-                'mm\:ss', 
-                'mmss', 
-                'ss', 
+                'hh\:mm\', 
+                'hhmm', 
+                'mm', 
                 'hh\hmm\m', 
                 'hh\hm\m', 
                 'h\hmm\m', 
@@ -22,7 +20,7 @@ class JiraTimeSpanConverterAttribute:System.Management.Automation.ArgumentTransf
                 'm\m'
             )
             [timespan]$result = 0
-            $inputStr = $inputData -replace '[^\d:]', ''
+            $inputStr = $inputData -replace '[^hHmM\d:]', ''
             if ([timespan]::TryParseExact($inputStr, $formats, $null, [ref]$result)) {
                 return $result
             }

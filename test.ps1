@@ -1,2 +1,2 @@
 ipmo .\AvJira.psd1 -Force
-Get-AvJiraWorklog
+Add-AvJiraWorklog -Time '1h 40m'

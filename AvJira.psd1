@@ -12,7 +12,7 @@
     RootModule           = 'AvJira.psm1'
 
     # Version number of this module.
-    ModuleVersion        = '0.8.14'
+    ModuleVersion        = '0.8.22'
 
     # Supported PSEditions
     # CompatiblePSEditions = @()
