@@ -57,7 +57,7 @@ RequiredModules = @('JiraPs')
 # RequiredAssemblies = @()
 
 # Script files (.ps1) that are run in the caller's environment prior to importing this module.
-# ScriptsToProcess = @()
+ScriptsToProcess = @('./Classes/ps1/Classes.ps1')
 
 # Type files (.ps1xml) to be loaded when importing this module
 TypesToProcess = '.\public\types\AvJira.types.ps1xml'
