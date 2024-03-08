@@ -43,7 +43,9 @@ EXAMPLES
     More info -> Get-Help Get-AvJiraWorkLog
     ---------------------------------------
     You can use Get-AvJiraWorklogSum to sum up the time of all given logs.
-    Its alias is AvJiraLogSum. To use it properly you should know how pipeline works in PowerShell.
+    Its alias is LogSum. To use it properly you should know how pipeline works in PowerShell.
+
+    Get-AvJiraWorkLog | logsum
 
     Worklogs and issues are standard objects. You can filter the manually using Where-Object (?).
     Get-AvJiraWorkLog | Where-object TimespentSeconds -gt 3600
