@@ -13,10 +13,10 @@ function Get-AvJiraQuery {
     $query = "worklogDate >= $startDateQuery AND worklogDate < $endDateQuery"
     
     $thisDayStart = [datetime]::Today
-    $thisWeekStart = [datetime]::today.adddays( - [int]$thisDayStart.DayOfWeek + 1) # jira starts week on Sunday (xDDDD); +1 because dayofweek enum starts at 1 so it would subtract to saturday
-    $thisMonthStart = Get-Date -Day 1 -Hour 0 -Minute 0 -Second 0
-    $thisyearStart = Get-Date -Month 1 -Day 1 -Hour 0 -Minute 0 -Second 0
-    
+    $thisWeekStart = $thisDayStart.AddDays( - [int]$thisDayStart.DayOfWeek + 1) # jira starts week on Sunday (xDDDD); +1 because dayofweek enum starts at 1 so it would subtract to saturday
+    $thisMonthStart = $thisDayStart.AddDays(- $thisDayStart.Day + 1) # subtract day of month (goes to previous month), add back 1 day (to go to current month)
+    $thisyearStart = $thisDayStart.AddDays(- $thisDayStart.DayOfYear + 1) # subtract day of month (goes to previous year), add back 1 day (to go to current year)
+
     $startDatetime, $endDateTime = if ($methodStem -eq 'Month') {
         $thisMonthStart.AddMonths($arg)
         $thisMonthStart.AddMonths($arg + 1).AddSeconds(-1)

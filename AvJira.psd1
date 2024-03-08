@@ -60,7 +60,7 @@ Description = 'Provides easier to use functions to work with worklogs in Jira'
 ScriptsToProcess = 'Classes\ps1\Classes.ps1'
 
 # Type files (.ps1xml) to be loaded when importing this module
-# TypesToProcess = @()
+TypesToProcess = 'Public\types\AvJira.types.ps1xml'
 
 # Format files (.ps1xml) to be loaded when importing this module
 FormatsToProcess = 'Public\format\Worklog.format.ps1xml'
