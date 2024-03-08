@@ -4,7 +4,7 @@ $moduleName = $MyInvocation.MyCommand.Name -replace '\.ps.1', ''
 $moduleManifest = $PSScriptRoot + $dirSep + $moduleName + '.psd1'
 $publicFunctionsPath = $PSScriptRoot + $dirSep + 'Public' + $dirSep + 'ps1'
 $privateFunctionsPath = $PSScriptRoot + $dirSep + 'Private' + $dirSep + 'ps1'
-#$classesPath =  $PSScriptRoot + $dirSep + 'Classes' + $dirSep + 'ps1'
+$classesPath =  $PSScriptRoot + $dirSep + 'Classes' + $dirSep + 'ps1'
 $formatFilesPath = $PSScriptRoot + $dirSep + 'Public' + $dirSep + 'format'
 $typesFilesPath = $PSScriptRoot + $dirSep + 'Public' + $dirSep + 'types'
 $currentManifest = Test-ModuleManifest $moduleManifest
@@ -13,12 +13,14 @@ $aliases = @()
 
 $publicFunctions = Get-ChildItem -Path $publicFunctionsPath -ErrorAction SilentlyContinue | Where-Object { $_.Extension -eq '.ps1' }
 $privateFunctions = Get-ChildItem -Path $privateFunctionsPath -ErrorAction SilentlyContinue | Where-Object { $_.Extension -eq '.ps1' }
+$classes = Get-ChildItem -Path $classesPath -ErrorAction SilentlyContinue | Where-Object { $_.Extension -eq '.ps1' }
 
 $formatFiles = Get-ChildItem -Path $formatFilesPath -ErrorAction SilentlyContinue | Where-Object { $_.Extension -eq '.ps1xml' }
 $typesFiles = Get-ChildItem -Path $typesFilesPath -ErrorAction SilentlyContinue | Where-Object { $_.Extension -eq '.ps1xml' }
 
 $privateFunctions | ForEach-Object { . $_.FullName }
 $publicFunctions | ForEach-Object { . $_.FullName }
+$classes | ForEach-Object { . $_.FullName }
 
 $publicFunctions | ForEach-Object { # Export all of the public functions from this module
     # The command has already been sourced in above. Query any defined aliases.
@@ -32,7 +34,7 @@ $publicFunctions | ForEach-Object { # Export all of the public functions from th
 }
 
 $formatFiles | ForEach-Object { # Export format data from module
-    Update-FormatData -PrependPath $_.FullName 
+    #Update-FormatData -PrependPath $_.FullName 
 }
 
 $typesFiles | ForEach-Object { # Export type data from module

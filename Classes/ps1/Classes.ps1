@@ -23,11 +23,11 @@ class Issue {
         $this.Worklogs = Get-JiraIssueWorklog -Issue $this.Key | Select-Object -First $maxWorkLogs | ForEach-Object -Begin {
             $i = 0; $null = $i
         } -Process {
-            Write-Progress -Activity 'Parsing worklogs...' -Status $_.Created -PercentComplete ($i / $maxWorkLogs * 100) @barParams
+            Write-Progress -Activity 'Parsing worklogs...' -Status $_.Created -PercentComplete ($i / $maxWorkLogs * 100) @script:ChildBarParams
             $i++
             [Worklog]::new($_, $this) 
         } -End {
-            Write-Progress -Activity 'Parsing worklogs...' -Status 'Done' @barParams -Completed
+            Write-Progress -Activity 'Parsing worklogs...' -Status 'Done' @script:ChildBarParams -Completed
         }
     }
     [Worklog[]] FilterLogsByDate([datetime]$startDate, [datetime]$endDate, [string[]]$user = $null) {
@@ -173,8 +173,4 @@ class Worklog {
         $this.Created = $jiraLogObject.Created
         $this.TimeSpent = [timespan]::FromSeconds($jiraLogObject.timespentseconds)
     }
-}
-$barParams = @{
-    ID       = 2137
-    ParentID = 420
 }

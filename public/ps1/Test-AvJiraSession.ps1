@@ -1,5 +1,3 @@
-$script:OutdatedVersionOnPurpose = $false
-$Separator = ';;;;____;;;;'
 function Test-AvJiraSession {
     Test-AvJiraUpdate
     if (-not (Get-JiraConfigServer)) {
@@ -13,7 +11,7 @@ function Test-AvJiraSession {
         if (-not $key) {
             $cred = Get-Credential -Message 'Saved credential not found. Provide username and password for this session. You can create saved credential with Set-(AvJira)Credentials'
         } else {
-            $username, $api = $key.split($Separator, [System.StringSplitOptions]::RemoveEmptyEntries)
+            $username, $api = $key.split($script:Separator, [System.StringSplitOptions]::RemoveEmptyEntries)
             $password = ConvertTo-SecureString $api -AsPlainText -Force -ErrorAction Stop
             $cred = New-Object System.Management.Automation.PSCredential ($username, $password)
         }

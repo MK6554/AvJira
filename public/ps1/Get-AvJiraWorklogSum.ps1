@@ -5,10 +5,11 @@ function Get-AvJiraWorklogSum {
     .DESCRIPTION
         Return total time spent from given logs. This cmdlet should be used in pipeline (with the | operator)
     .EXAMPLE
-        get-avjiraworklog | avjiralogsum
+        get-avjiraworklog | logsum
     #>
     
     [CmdletBinding()]
+    [Alias('logsum')]
     param (
         [Parameter(ValueFromPipeline, ValueFromPipelineByPropertyName)]
         [Worklog[]]
@@ -31,4 +32,3 @@ function Get-AvJiraWorklogSum {
         }
     }
 }
-Set-Alias -Name logsum -Value Get-AvJiraWorklogSum

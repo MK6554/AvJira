@@ -29,13 +29,13 @@ function Get-AvJiraIssue {
         $Status
     )
     Test-AvJiraSession
-    Write-Progress -Activity 'Fetching issues...' -Status 'Contacting server...' @barParams
+    Write-WrappedProgress -Activity 'Fetching issues...' -Status 'Contacting server...'
     if ($PSCmdlet.ParameterSetName -eq 'KEY') {
         $rawIssues = Get-JiraIssue $issue
         $total = $rawIssues.Count
         $counter = 0
         $rawIssues | ForEach-Object {
-            Write-Progress -Activity 'Parsing issues...' -Status $_.Key -PercentComplete ($counter / $total * 100) @barParams
+            Write-WrappedProgress -Activity 'Parsing issues...' -Status $_.Key -current $counter -Total $total
             $counter++
             [Issue]::new($_) } 
     } else {
@@ -57,14 +57,10 @@ function Get-AvJiraIssue {
         $total = $rawIssues.Count
         $counter = 0
         Get-JiraIssue -Query $final_query | ForEach-Object { 
-            Write-Progress -Activity 'Parsing issues...' -Status $_.Key -PercentComplete ($counter / $total * 100) @barParams
+            Write-WrappedProgress -Activity 'Parsing issues...' -Status $_.Key -current $counter -Total $total 
             $counter++
             [Issue]::new($_)
         } 
-        Write-Progress -Activity 'Parsing issues...' -Status 'Done' -Completed @barParams
+        Write-WrappedProgress -Activity 'Parsing issues...' -Status 'Done' -current $counter -Total $total -Completed
     }
-}
-
-$barParams = @{
-    ID = 420
 }
