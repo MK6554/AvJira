@@ -1,4 +1,3 @@
-
 function Add-AvJiraWorklog {
     [CmdletBinding()]
     param (

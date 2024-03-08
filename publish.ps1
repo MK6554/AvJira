@@ -1,5 +1,6 @@
-Write-Host $psscriptRoot
-$folderToExport = Join-Path $PSScriptRoot 'AvJira'
+Push-Location $psscriptRoot
+$moduleName = 'AvJira'
+$folderToExport = Join-Path $PSScriptRoot $moduleName
 if (Test-Path $folderToExport) {
     Remove-Item $folderToExport -Force -Recurse -Verbose
 }
@@ -20,4 +21,6 @@ foreach ($file in $Files) {
     Copy-Item $file.fullname -Destination $newPath -Force -Verbose
 }
 $import = Get-ChildItem $folderToExport *.psd1 | Select-Object -First 1
-Import-Module $import.FullName -Force -Verbose
+Import-Module $import.FullName -Force -Verbose -EA SilentlyContinue
+Publish-Module -Path $moduleName -Repository PowershellSupportRepository
+Pop-Location

@@ -1,4 +1,3 @@
-
 function Get-AvJiraWorklog {
     <#
     .SYNOPSIS
@@ -44,7 +43,7 @@ function Get-AvJiraWorklog {
         $foundIssue | ForEach-Object Worklogs | Sort-Object Started
     } else {
         #periodMode
-        $query, $startDate, $endDate = GetQuery $period
+        $query, $startDate, $endDate = Get-AvJiraQuery $period
 
         $user = $user | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
         if (@($user).Count -eq 1) {

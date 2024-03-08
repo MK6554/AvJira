@@ -1,6 +1,6 @@
 # Join-Path works differently on 5, otherwise would have used it
 $dirSep = [System.IO.Path]::DirectorySeparatorChar
-$moduleName = Split-Path $PSScriptRoot -Leaf
+$moduleName = $MyInvocation.MyCommand.Name -replace '\.ps.1', ''
 $moduleManifest = $PSScriptRoot + $dirSep + $moduleName + '.psd1'
 $publicFunctionsPath = $PSScriptRoot + $dirSep + 'Public' + $dirSep + 'ps1'
 $privateFunctionsPath = $PSScriptRoot + $dirSep + 'Private' + $dirSep + 'ps1'
@@ -36,7 +36,7 @@ $formatFiles | ForEach-Object { # Export format data from module
 }
 
 $typesFiles | ForEach-Object { # Export type data from module
-    Update-TypeData -PrependPath $_.FullName
+    #Update-TypeData -PrependPath $_.FullName
 }
 
 $functionsAdded = $publicFunctions | Where-Object { $_.BaseName -notin $currentManifest.ExportedFunctions.Keys }

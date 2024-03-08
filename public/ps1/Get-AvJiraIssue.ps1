@@ -29,13 +29,14 @@ function Get-AvJiraIssue {
         $Status
     )
     Test-AvJiraSession
+    Write-Progress -Activity 'Fetching issues...' -Status 'Contacting server...' @barParams
     if ($PSCmdlet.ParameterSetName -eq 'KEY') {
-        Write-Progress -Activity 'Fetching issues...' @$barParams
         $rawIssues = Get-JiraIssue $issue
         $total = $rawIssues.Count
         $counter = 0
-        Get-JiraIssue $issue | ForEach-Object {
-            Write-Progress -Activity 'Parsing issues...' -Status $_.Key -Id 420 -PercentComplete ($counter / $total * 100) @$barParams
+        $rawIssues | ForEach-Object {
+            Write-Progress -Activity 'Parsing issues...' -Status $_.Key -PercentComplete ($counter / $total * 100) @barParams
+            $counter++
             [Issue]::new($_) } 
     } else {
         $addParts = @($query)
@@ -52,11 +53,15 @@ function Get-AvJiraIssue {
         $parts = $addParts | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
         $final_query = $parts -join ' AND '
         Write-Verbose $final_query
+        $rawIssues = Get-JiraIssue -Query $final_query
+        $total = $rawIssues.Count
+        $counter = 0
         Get-JiraIssue -Query $final_query | ForEach-Object { 
-            Write-Progress -Activity 'Parsing issues...' -Status $_.Key @$barParams
+            Write-Progress -Activity 'Parsing issues...' -Status $_.Key -PercentComplete ($counter / $total * 100) @barParams
+            $counter++
             [Issue]::new($_)
         } 
-        Write-Progress -Activity 'Parsing issues...' -Status 'Done' -Completed @$barParams
+        Write-Progress -Activity 'Parsing issues...' -Status 'Done' -Completed @barParams
     }
 }
 
