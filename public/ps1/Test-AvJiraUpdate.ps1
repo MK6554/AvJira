@@ -5,6 +5,9 @@ function Test-AvJiraUpdate {
         [switch]
         $force
     )
+    if ($outside_checkPerformed -and -not $force.IsPresent) {
+        return
+    }
     $timeSinceCheck = [datetime]::now - $script:DateChecked
     if ($script:NewerInstalled) {
         Write-Verbose 'Update already installed. Need to start a new PowerShell session'
@@ -16,9 +19,9 @@ function Test-AvJiraUpdate {
         Write-Verbose "Next update check in $timeToCheck"
         return
     }
-    Write-Verbose 'Looking for module updates.'
+    Write-WrappedProgress -Activity 'Checking for module updates...'
     $currentModule = Get-Module avjira -Verbose:$false
-    $newestModule = Find-Module avjira -Repository 'PowershellSupportRepository' -Verbose:$false
+    $newestModule = Find-Module avjira -Repository 'PowershellSupportRepository' -Verbose:$false -ea SilentlyContinue
     if ($newestModule.Version -gt $currentModule.Version) {
         Write-Warning "Updates to AvJira detected ($($currentModule.Version) -> $($newestModule.Version)). Starting update..."
         Update-Module AvJira -ea SilentlyContinue -Verbose:$false
@@ -27,5 +30,6 @@ function Test-AvJiraUpdate {
     } else {
         Write-Verbose 'No updates found.'
     }
+    Write-WrappedProgress -Activity 'Checking for module updates...' -Completed
     $script:DateChecked = Get-Date
 }

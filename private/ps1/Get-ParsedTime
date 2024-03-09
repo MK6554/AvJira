@@ -1,0 +1,19 @@
+function Get-ParsedTime {
+    param (
+        [Parameter()]
+        [object]
+        $Time
+    )
+    if ($Time) {
+        return $time
+    }
+    while ($true) {
+        $temp = Read-Host 'Enter time spent'
+        try {
+            $Time = [JiraTimeSpanConverterAttribute]::new().Transform($null, $temp)
+            break
+        } catch [System.ArgumentException] {
+            Write-Host "$temp was not invalid time format. Try again (hh:mm:ss or hhmmss)."
+        }
+    }
+}

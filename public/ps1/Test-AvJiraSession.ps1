@@ -1,4 +1,7 @@
 function Test-AvJiraSession {
+    if ($outside_checkPerformed) {
+        return
+    }
     Test-AvJiraUpdate
     if (-not (Get-JiraConfigServer)) {
         Write-Warning 'Jira server is not configured!'
@@ -6,7 +9,8 @@ function Test-AvJiraSession {
         Set-JiraConfigServer $address
     }
     if (-not (Get-JiraSession)) {
-        Write-Verbose 'No session active. Creating...'
+        
+        Write-WrappedProgress -Activity 'Creating session...'
         $key = Load_AvJiraApiKey
         if (-not $key) {
             $cred = Get-Credential -Message 'Saved credential not found. Provide username and password for this session. You can create saved credential with Set-(AvJira)Credentials'
@@ -16,5 +20,6 @@ function Test-AvJiraSession {
             $cred = New-Object System.Management.Automation.PSCredential ($username, $password)
         }
         $null = New-JiraSession -Credential $cred
+        Write-WrappedProgress -Activity 'Creating session...' -Completed
     }
 }

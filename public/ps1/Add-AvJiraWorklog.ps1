@@ -17,6 +17,10 @@ function Add-AvJiraWorklog {
         $Time
     )
     Test-AvJiraSession
+        
+    $local:outside_checkPerformed = $true # will skip session test for any subcommands
+    $null = $local:outside_checkPerformed # to silence warnings about unused variable
+
     while (-not $issue) {
         $Issue = Read-Host 'Enter issue ID'
         if (-not $Issue) { Write-Host 'Issue cannot be empty' }
@@ -24,34 +28,10 @@ function Add-AvJiraWorklog {
     if (-not $Comment) {
         $Comment = Read-Host 'Enter work log comment'
     } 
-    if (-not $Time) {
-        while ($true) {
-            $temp = Read-Host 'Enter time spent'
-            try {
-                $Time = [JiraTimeSpanConverterAttribute]::new().Transform($null, $temp)
-                break
-            } catch [System.ArgumentException] {
-                Write-Host "$temp was not invalid time format. Try again (hh:mm:ss or hhmmss)."
-            }
-        }
-    } 
-    if (-not $Date) {
-        $now = [datetime]::now
-        while ($true) {
-            $temp = Read-Host "Enter date of work (leave empty to use current date: $now))"
-            if ($temp -notmatch '[\d-:]+') {
-                $Date = $now
-                break
-            } else {
-                try {
-                    $Date = [JiraDateTimeConverterAttribute]::new().Transform($null, $temp)
-                    break
-                } catch [System.ArgumentException] {
-                    Write-Host "$temp was not a valid date. Try again (yyyy-mm-dd)."
-                }
-            }
-        }
-    }
+
+    $Time = Get-ParsedTime $Time
+    $Date = Get-ParsedDate $Date
+    
     $log = @{
         Comment     = $Comment
         Issue       = $Issue
@@ -65,3 +45,5 @@ function Add-AvJiraWorklog {
     Read-Host 'Press ENTER to add or CTRL-Z to cancel'
     Add-JiraIssueWorklog @log  
 }
+
+

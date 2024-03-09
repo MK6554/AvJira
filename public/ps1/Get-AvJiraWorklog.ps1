@@ -22,42 +22,50 @@ function Get-AvJiraWorklog {
         [Parameter()]
         [string[]]
         $User,
-        [Parameter(ParameterSetName = 'ISSUE')]
-        [string[]]
+        [Parameter(ParameterSetName = 'ISSUE', ValueFromPipelineByPropertyName)]
+        [object[]]
         $Issue
     )
-    $issueMode = $PSCmdlet.ParameterSetName -eq 'ISSUE'
-    $periodMode = $PSCmdlet.ParameterSetName -eq 'PERIOD'
-    Test-AvJiraSession
-    if (-not $User -and $periodMode) {
-        Write-Verbose "No username specified. Defaulting to credential's name."
-        $User = (Get-JiraSession).UserName
+    begin {
+        Test-AvJiraSession
+        $local:outside_checkPerformed = $true # will skip session test for any subcommands
+        $null = $local:outside_checkPerformed # to silence warnings about unused variable
+
     }
+    process {
+        $issueMode = $PSCmdlet.ParameterSetName -eq 'ISSUE'
+        $periodMode = $PSCmdlet.ParameterSetName -eq 'PERIOD'
 
-    if ($issueMode) {
-        $foundIssue = Get-AvJiraIssue -Issue $Issue
-        if (-not $foundIssue) {
-            $msg = if (@($issue).Count -eq 1) { "Issue $issue could not be found" } else { "Issues $issue could not be found" }
-            Write-Error $msg -ErrorAction Stop
-        }
-        $foundIssue | ForEach-Object Worklogs | Sort-Object Started
-    } else {
-        #periodMode
-        $query, $startDate, $endDate = Get-AvJiraQuery $period
-
-        $user = $user | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
-        if (@($user).Count -eq 1) {
-            $query += " AND worklogAuthor = '$user'"
-        } elseif (@($user).Count -gt 1) {
-            $user = $user | ForEach-Object { "'$_'" }
-            $joined = '(' + ($user -join ', ') + ')'
-            $query += " AND  worklogAuthor in $joined"
+        if (-not $User -and $periodMode) {
+            Write-Verbose "No username specified. Defaulting to credential's name."
+            $User = (Get-JiraSession).UserName
         }
 
-        $foundIssue = Get-AvJiraIssue -Query $query
-        if (-not $foundIssue) {
-            Write-Error "Query $query yielded no results" -ErrorAction Stop
+        if ($issueMode) {
+        
+            Get-AvJiraIssue -Issue $Issue | Get-AvJiraWorklog_Impl
+        
+        } else {
+            #periodMode
+            $query, $startDate, $endDate = Get-AvJiraQuery $period
+
+            $user = $user | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+            $queryParts = @($query)
+            if (@($user).Count -eq 1) {
+
+                $queryParts += @("worklogAuthor = '$user'")
+
+            } elseif (@($user).Count -gt 1) {
+
+                $user = $user | ForEach-Object { "'$_'" }
+                $joined = '(' + ($user -join ', ') + ')'
+                $queryParts += @("worklogAuthor in $joined")
+            }
+            $queryParts = $queryParts | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+            $query = $queryParts -join ' AND '
+
+            $worklogs = Get-AvJiraIssue -Query $query | Get-AvJiraWorklog_Impl
+            $worklogs
         }
-        $foundIssue.FilterLogsByDate($startDate, $endDate, $user) | Sort-Object Started
     }
 }

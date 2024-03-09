@@ -55,7 +55,18 @@
 								<ScriptBlock>$_.Issue.Summary</ScriptBlock>
 							</TableColumnItem>
 							<TableColumnItem>
-								<ScriptBlock>$_.Comment</ScriptBlock>
+								<ScriptBlock>
+									if ([string]::IsNullOrWhitespace($_.Comment)) {
+										$msg = '---No comment---'
+										if ($PSVersionTable.PSVersion.Major -ge 6) {
+											"`e[2m$msg`e[0m"
+										} else {
+											$msg
+										} 
+									} else {
+										$_.Comment
+									}
+								</ScriptBlock>
 							</TableColumnItem>
 							<TableColumnItem>
 								<ScriptBlock>$_.Author.ID</ScriptBlock>

@@ -24,11 +24,17 @@ function Get-AvJiraQuery {
     } elseif ($methodStem -eq 'Year') {
         $thisyearStart.AddYears($arg)
         $thisyearStart.AddYears($arg + 1).AddSeconds(-1)
-    } else {
-        #day
+    } elseif ($methodStem -eq 'Day') {
         $thisDayStart.AddDays($arg)
         $thisDayStart.AddDays($arg + 1).AddSeconds(-1)
+    } else {
+        #All
+        Write-Warning 'Getting issue without time limits might be really slow!'
+        [datetime]::MinValue
+        [datetime]::MaxValue
+        $query = ''
     }
 
     $query, $startDateTime, $endDateTime
 }
+

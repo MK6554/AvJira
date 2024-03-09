@@ -15,8 +15,9 @@ function Get-AvJiraIssue {
     [CmdletBinding(DefaultParameterSetName = 'KEY')]
     [OutputType([Issue])]
     param (
-        [Parameter(Position = 0, ParameterSetName = 'KEY')]
-        [string[]]
+        [Parameter(Position = 0, ParameterSetName = 'KEY', ValueFromPipelineByPropertyName, ValueFromPipeline)]
+        [Alias('IssueID')]
+        [object[]]
         $Issue,
         [Parameter(ParameterSetName = 'QUERY')]
         [string]
@@ -28,39 +29,35 @@ function Get-AvJiraIssue {
         [string[]]
         $Status
     )
-    Test-AvJiraSession
-    Write-WrappedProgress -Activity 'Fetching issues...' -Status 'Contacting server...'
-    if ($PSCmdlet.ParameterSetName -eq 'KEY') {
-        $rawIssues = Get-JiraIssue $issue
-        $total = $rawIssues.Count
-        $counter = 0
-        $rawIssues | ForEach-Object {
-            Write-WrappedProgress -Activity 'Parsing issues...' -Status $_.Key -current $counter -Total $total
-            $counter++
-            [Issue]::new($_) } 
-    } else {
-        $addParts = @($query)
-        if ($user) {
-            $quoted = $user | ForEach-Object { "'$_'" }
-            $commaed = $quoted -join ', '
-            $addParts += "assignee in ($commaed)"
+    begin {
+
+        Test-AvJiraSession
+
+        $local:outside_checkPerformed = $true # will skip session test for any subcommands
+        $null = $local:outside_checkPerformed # to silence warnings about unused variable
+
+        Write-WrappedProgress -Activity 'Fetching issues...' -Status 'Contacting server...'
+
+    }
+    process {
+
+        if ($PSCmdlet.ParameterSetName -eq 'KEY') {
+
+            Get-AvJiraIssue_Issue $input
+
+        } else {
+            $params = @{
+                Query  = $Query
+                User   = $User
+                Status = $Status
+            }
+            Get-AvJiraIssue_Query @params
+
         }
-        if ($Status) {
-            $quoted = $Status | ForEach-Object { "'$_'" }
-            $commaed = $quoted -join ', '
-            $addParts += "Status in ($commaed)"
-        }
-        $parts = $addParts | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
-        $final_query = $parts -join ' AND '
-        Write-Verbose $final_query
-        $rawIssues = Get-JiraIssue -Query $final_query
-        $total = $rawIssues.Count
-        $counter = 0
-        Get-JiraIssue -Query $final_query | ForEach-Object { 
-            Write-WrappedProgress -Activity 'Parsing issues...' -Status $_.Key -current $counter -Total $total 
-            $counter++
-            [Issue]::new($_)
-        } 
-        Write-WrappedProgress -Activity 'Parsing issues...' -Status 'Done' -current $counter -Total $total -Completed
+    }
+    end {
+
+        Write-WrappedProgress -Activity 'Parsing issues...' -Status 'Done' -Completed
+
     }
 }
