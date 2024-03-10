@@ -5,21 +5,29 @@ function Get-AvJiraWorklog {
     .DESCRIPTION
         Returns worklogs which are either from the given period or from specified issues.
     .PARAMETER Period
-        Period of time from which logs should be fetched
+        Period of time from which logs should be fetched. Defaults to 'ThisMonth' if no specific issue is requested. If Issue is provided, defaults to 'AllTime'
     .PARAMETER User
-        Optional user name to limit worklogs to.
+        Optional user name to limit worklogs to. If fetching all issues from a period - defaults to currently logged user and CANNOT be empty. If fetching specific issue, is empty by default.
     .PARAMETER Issue
-        Isue from which the logs will be fetched. Cannot be used with -Period.
+        Issue from which the logs will be fetched.
     .EXAMPLE
         Get-AvJiraWorkLog [-Period] LastMonth
         returns logs from last month for the logged in user
+    .EXAMPLE
+        Get-AvJiraWorkLog -User 'John Zebra'
+        returns logs from last month for the user John Zebra
+    .EXAMPLE
+        Get-AvJiraWorkLog -User 'JZ0000'
+        returns logs from last month for the user JZ0000 (John Zebra)
     #>
-    [CmdletBinding(DefaultParameterSetName = 'PERIOD')]
+    #>
+    [CmdletBinding(DefaultParameterSetName = 'DEFAULT')]
     param (
-        [Parameter(ParameterSetName = 'PERIOD', Position = 0)]
-        [Period]
-        $Period = [period]::ThisMonth,
+        [Parameter(Position = 0)]
+        [System.Nullable[Period]]
+        $Period = $null,
         [Parameter()]
+        [Alias('Author')]
         [string[]]
         $User,
         [Parameter(ParameterSetName = 'ISSUE', ValueFromPipelineByPropertyName)]
@@ -27,27 +35,34 @@ function Get-AvJiraWorklog {
         $Issue
     )
     begin {
-        Test-AvJiraSession
+        $null = Get-AvJiraSession
         $local:outside_checkPerformed = $true # will skip session test for any subcommands
         $null = $local:outside_checkPerformed # to silence warnings about unused variable
 
     }
     process {
         $issueMode = $PSCmdlet.ParameterSetName -eq 'ISSUE'
-        $periodMode = $PSCmdlet.ParameterSetName -eq 'PERIOD'
+        $periodMode = -not $issueMode
+        $issueParams = @{}
 
-        if (-not $User -and $periodMode) {
-            Write-Verbose "No username specified. Defaulting to credential's name."
-            $User = (Get-JiraSession).UserName
+        if ($null -eq $period) {
+            $period = if ($issueMode) { [Period]::AllTime } else { [Period]::ThisMonth }
         }
 
+        $query, $startDate, $endDate = Get-AvJiraQuery $period -silent:$issueMode
+
+        
         if ($issueMode) {
-        
-            Get-AvJiraIssue -Issue $Issue | Get-AvJiraWorklog_Impl
-        
+            
+            $issueParams['Issue'] = $Issue
+            
         } else {
             #periodMode
-            $query, $startDate, $endDate = Get-AvJiraQuery $period
+            
+            if (-not $User) {
+                Write-Log "No username specified. Defaulting to credential's name."
+                $User = (Get-JiraSession).UserName
+            }
 
             $user = $user | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
             $queryParts = @($query)
@@ -64,8 +79,13 @@ function Get-AvJiraWorklog {
             $queryParts = $queryParts | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
             $query = $queryParts -join ' AND '
 
-            $worklogs = Get-AvJiraIssue -Query $query | Get-AvJiraWorklog_Impl
-            $worklogs
+            $issueParams['Query'] = $query
         }
+        $worklogs = Get-AvJiraIssue @issueParams | Get-AvJiraWorklog_Impl -StartDate $startDate -EndDate $endDate -Author $User | Sort-Object Started -Descending
+        $worklogs
+    }
+    end {
+        Clear-WrappedProgress
+        Write-Log "$($MyInvocation.MyCommand.Name) finished."
     }
 }

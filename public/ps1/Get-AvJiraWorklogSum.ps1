@@ -25,10 +25,6 @@ function Get-AvJiraWorklogSum {
     }
     end {
         $s = [SummedWorklogs]::new($logs.Toarray())
-        [PSCustomObject][ordered]@{
-            LogCount  = $s.Worklogs.count
-            Issues    = $s.Issue.Count
-            TotalTime = $s.TimeSpentTotal
-        }
+        $s
     }
 }

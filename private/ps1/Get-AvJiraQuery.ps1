@@ -1,7 +1,9 @@
 function Get-AvJiraQuery {
     param (
         [Period]
-        $Period
+        $Period,
+        [Switch]
+        $Silent
     )
     $periodStr = if ($Period -eq 'Today') { 'ThisDay' }elseif ($Period -eq 'Yesterday') { 'LastDay' }else { $period.TOstring() }
     $methodStem = $periodStr.Substring(4)
@@ -29,7 +31,9 @@ function Get-AvJiraQuery {
         $thisDayStart.AddDays($arg + 1).AddSeconds(-1)
     } else {
         #All
-        Write-Warning 'Getting issue without time limits might be really slow!'
+        if (-not $Silent.IsPresent) {
+            Write-Log 'Getting issue without time limits might be really slow!' -warning
+        }
         [datetime]::MinValue
         [datetime]::MaxValue
         $query = ''

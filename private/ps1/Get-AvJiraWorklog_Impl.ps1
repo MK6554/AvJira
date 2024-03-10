@@ -9,7 +9,10 @@ function Get-AvJiraWorklog_Impl {
         $StartDate,
         [Parameter()]
         [datetime]
-        $EndDate
+        $EndDate,
+        [Parameter()]
+        [string[]]
+        $Authors
     )
     process {
 
@@ -18,20 +21,33 @@ function Get-AvJiraWorklog_Impl {
             $worklogCount = $issue.WorklogCount
         }
         $counter = 0
-        Write-WrappedProgress -Activity 'Parsing worklogs...' -Status 'Contacting server...' -child
         if (-not $EndDate) {
             $EndDate = [datetime]::MaxValue
         }
-        $logs = Get-JiraIssueWorklog $issue.Key | 
+        Get-JiraIssueWorklog $issue.Key | 
             Select-Object -First $worklogCount | 
-            Where-Object { $_.Started -ge $StartDate -and $_.started -lt $EndDate } | 
+            Where-Object { $_.Started -ge $StartDate -and $_.started -lt $EndDate -and (Test-Author $_.Author $Authors) } | 
             ForEach-Object {
-                Write-WrappedProgress -Activity 'Parsing worklogs...' -Status $item.Key -current $counter -Total $worklogCount -child
-                [Worklog]::new($_,$Issue) 
                 $counter++
+                Write-WrappedProgress -Activity 'Getting worklogs...' -Status $item.Started -current $counter -Total $worklogCount -child
+                [Worklog]::new($_, $Issue) 
             }
-        Write-WrappedProgress -Activity 'Parsing worklogs...' -Completed -child
-        
-        $logs | Sort-Object Started -Descending
+    }
+}
+
+function Test-Author {
+    [CmdletBinding()]
+    param (
+        [Parameter()]
+        [object]
+        $Author,
+        [Parameter()]
+        [string[]]
+        $Authors
+    )
+    if (-not $Authors) {
+        $true
+    } else {
+        $Authors -contains $Author.Name -or $Authors -contains $Author.DisplayName
     }
 }

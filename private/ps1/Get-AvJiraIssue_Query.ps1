@@ -6,14 +6,14 @@ function Get-AvJiraIssue_Query {
         $Query,
         [Parameter()]
         [string[]]
-        $User,
+        $Assignee,
         [Parameter()]
         [string[]]
         $Status
     )
     $addParts = @($query)
-    if ($user) {
-        $quoted = $user | ForEach-Object { "'$_'" }
+    if ($Assignee) {
+        $quoted = $Assignee | ForEach-Object { "'$_'" }
         $commaed = $quoted -join ', '
         $addParts += "assignee in ($commaed)"
     }
@@ -24,13 +24,14 @@ function Get-AvJiraIssue_Query {
     }
     $parts = $addParts | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
     $final_query = $parts -join ' AND '
-    Write-Verbose $final_query
+    Write-Log $final_query
+    Write-WrappedProgress -Activity 'Getting issues...' -Status "Fetching query: $final_query"
     $rawIssues = Get-JiraIssue -Query $final_query
     $total = $rawIssues.Count
     $counter = 0
     Get-JiraIssue -Query $final_query | ForEach-Object { 
-        Write-WrappedProgress -Activity 'Parsing issues...' -Status $_.Key -current $counter -Total $total 
         $counter++
+        Write-WrappedProgress -Activity 'Getting issues...' -Status $_.Key -current $counter -Total $total 
         [Issue]::new($_)
     } 
 }

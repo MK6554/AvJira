@@ -12,7 +12,12 @@ function Set-AvJiraCredentials {
     if (Test-Path $script:EncryptedApiPath) {
         Remove-Item $script:EncryptedApiPath
     }
-    $msg = "$username$script:Separator$apikey"
+    $msg = "$username$script:CredentialSeparator$apikey"
     $null = New-Item -ItemType Directory -Path (Split-Path $script:EncryptedApiPath) -Force
     $msg | Protect-CmsMessage -To "cn=$script:CertificateName" -OutFile $script:EncryptedApiPath -Verbose
+    $oldSession = Get-JiraSession
+    if ($oldSession) {
+        Remove-JiraSession $oldSession
+    }
+    New-JiraSession $creds
 }

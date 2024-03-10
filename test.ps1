@@ -1,2 +1,2 @@
 ipmo .\AvJira.psd1 -Force
-Get-AvJiraWorklog all
+Add-AvJiraWorklog -Issue a -Time 12 

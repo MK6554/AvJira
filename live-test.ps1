@@ -4,7 +4,7 @@ param (
     [switch]
     $PS5
 )
-$commands = '$psversiontable.PSversion;ipmo jiraps;ipmo ./AvJira.psd1'
+$commands = '$psversiontable.PSversion;(Measure-Command{ipmo ./AvJira.psd1}).TotalSeconds'
 if ($PS5.IsPresent) {
     powershell -noexit -noprofile -command $commands
 } else {

@@ -1,5 +1,6 @@
-$script:MainId = 2006
-$script:ChildId = 1969
+$script:MainId = 1992
+$script:AuxId = 1986
+$script:ChildId = 2001
 
 $script:MainBarParams = @{
     ID = $script:MainId
@@ -8,7 +9,14 @@ $script:ChildBarParams = @{
     ID       = $script:ChildId
     ParentID = $script:MainId
 }
-
+$script:AuxBarParams = @{
+    ID = $script:AuxId
+}
+function Clear-WrappedProgress {
+    Write-WrappedProgress -Activity 'Finished' -Completed -Auxiliary
+    Write-WrappedProgress -Activity 'Finished' -Completed -child
+    Write-WrappedProgress -Activity 'Finished' -Completed 
+}
 function Write-WrappedProgress {
     [CmdletBinding()]
     param (
@@ -29,12 +37,19 @@ function Write-WrappedProgress {
         $Child,
         [Parameter()]
         [switch]
+        $Auxiliary,
+        [Parameter()]
+        [switch]
         $Completed
     )
-    $params = if ($child.IsPresent) { $script:ChildBarParams.Clone() } else { $script:MainBarParams.Clone() }
+    if ($Auxiliary.IsPresent) {
+        $params = $AuxBarParams.clone()
+    } else {
+        $params = if ($child.IsPresent) { $script:ChildBarParams.Clone() } else { $script:MainBarParams.Clone() }
+    }
     
     $params['Activity'] = $Activity
-    $params['Status'] = if ([string]::IsNullOrWhiteSpace($Status)) { $Activity } else { $Status }
+    $params['Status'] = if ([string]::IsNullOrWhiteSpace($Status)) { 'Processing...' } else { $Status }
     
     $percent = if ($Total -gt 0 -and $Current -ge 0) {
         $Current / $total * 100
@@ -44,7 +59,7 @@ function Write-WrappedProgress {
     if ($percent -gt 100) {
         $percent = -1
     }
-    $params['-PercentComplete'] = $percent
+    $params['PercentComplete'] = $percent
     $params['Completed'] = $Completed.IsPresent
     Write-Progress @params
 }

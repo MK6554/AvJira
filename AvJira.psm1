@@ -1,10 +1,16 @@
+Push-Location $PSScriptRoot
+trap {
+    Pop-Location 
+    break 
+}
+Import-Module JiraPs -ea Stop
 # Join-Path works differently on 5, otherwise would have used it
 $dirSep = [System.IO.Path]::DirectorySeparatorChar
 $moduleName = $MyInvocation.MyCommand.Name -replace '\.ps.1', ''
 $moduleManifest = $PSScriptRoot + $dirSep + $moduleName + '.psd1'
 $publicFunctionsPath = $PSScriptRoot + $dirSep + 'Public' + $dirSep + 'ps1'
 $privateFunctionsPath = $PSScriptRoot + $dirSep + 'Private' + $dirSep + 'ps1'
-$classesPath =  $PSScriptRoot + $dirSep + 'Classes' + $dirSep + 'ps1'
+$classesPath = $PSScriptRoot + $dirSep + 'Classes' + $dirSep + 'ps1'
 $formatFilesPath = $PSScriptRoot + $dirSep + 'Public' + $dirSep + 'format'
 $typesFilesPath = $PSScriptRoot + $dirSep + 'Public' + $dirSep + 'types'
 $currentManifest = Test-ModuleManifest $moduleManifest
@@ -63,8 +69,8 @@ if ($functionsAdded -or $functionsRemoved -or $aliasesAdded -or $aliasesRemoved 
         $updateModuleManifestParams.Add('ErrorAction', 'Stop')
         if ($aliases.Count -gt 0) { $updateModuleManifestParams.Add('AliasesToExport', $aliases) }
         if ($publicFunctions.Count -gt 0) { $updateModuleManifestParams.Add('FunctionsToExport', $publicFunctions.BaseName) }
-        if ($formatFiles.Count -gt 0) { $updateModuleManifestParams.Add('FormatsToProcess', ($formatFiles.FullName | Resolve-Path -Relative -RelativeBasePath $PSScriptRoot)) }
-        if ($typesFiles.Count -gt 0) { $updateModuleManifestParams.Add('TypesToProcess', ($typesFiles.FullName | Resolve-Path -Relative -RelativeBasePath $PSScriptRoot)) }
+        if ($formatFiles.Count -gt 0) { $updateModuleManifestParams.Add('FormatsToProcess', ($formatFiles.FullName | Resolve-Path -Relative )) }
+        if ($typesFiles.Count -gt 0) { $updateModuleManifestParams.Add('TypesToProcess', ($typesFiles.FullName | Resolve-Path -Relative )) }
 
         Update-ModuleManifest @updateModuleManifestParams
 
@@ -73,5 +79,5 @@ if ($functionsAdded -or $functionsRemoved -or $aliasesAdded -or $aliasesRemoved 
         $_ | Write-Error
 
     }
-
 }
+Pop-Location
