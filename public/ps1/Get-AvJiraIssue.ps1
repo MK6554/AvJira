@@ -46,7 +46,7 @@ function Get-AvJiraIssue {
 
         if ($PSCmdlet.ParameterSetName -eq 'KEY') {
 
-            Get-AvJiraIssue_Issue $Issue
+            Get-AvJiraIssue_Issue $Issue | Tee-Object -Variable Global:AvJiraLastOutput
 
         } else {
             $params = @{
@@ -54,7 +54,7 @@ function Get-AvJiraIssue {
                 Assignee = $Assignee
                 Status   = $Status
             }
-            Get-AvJiraIssue_Query @params
+            Get-AvJiraIssue_Query @params | Tee-Object -Variable Global:AvJiraLastOutput
 
         }
     }
