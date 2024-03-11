@@ -255,19 +255,16 @@ class JiraTimeSpanConverterAttribute:System.Management.Automation.ArgumentTransf
             'hh\:mm\', 
             'hhmm', 
             'mm', 
-            'm', 
             'hh\hmm\m', 
             'hh\hm\m', 
-            'h\hmm\m', 
-            'h\hm\m', 
             'hh\h',
-            'h\h',
             'mm\m'
-            'm\m'
         )
         [timespan]$result = 0
-        $inputStr = $inputData -replace '[^hHmM\d:]', ''
-        $inputStr = $inputStr.ToUpper()
+        $inputStr = $inputData -replace '[^hHmM\d:]', '' # remove everything that is not a number or h/m
+        $inputStr = $inputStr -replace '(?<!\d)\d(?!\d)','0$0' # find all digits, which do NOT have a leading digit and do NOT have a following digit
+        # in short - find all single digits - replace them by adding a leading zero
+        $inputStr = $inputStr.ToLower()
         if ([timespan]::TryParseExact($inputStr, $formats, $null, [ref]$result)) {
             return $result
         }

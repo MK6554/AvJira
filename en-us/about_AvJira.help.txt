@@ -56,4 +56,5 @@ KEYWORDS
     Jira, Worklog
 
 SEE ALSO
+    https://github.com/Pedrokostam/AvJira - project repo. Bug report and suggestions welcome.
     https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_pipelines
