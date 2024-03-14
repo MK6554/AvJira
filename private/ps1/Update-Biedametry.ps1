@@ -16,17 +16,23 @@ function Update-Biedametry ([string]$name, $params) {
     }
     $destination = Join-Path $destinationUserFolder "$datename.json"
 
-    $content = if (Test-Path $destination) {
-        Get-Content $destination -raw
+    $contentSource = if (Test-Path $destination) {
+        Get-Content $destination -Raw
     } else { @() }
 
-    $content = $content | ConvertFrom-Json -NoEnumerate
+    [object[]]$content = $contentSource | ConvertFrom-Json
+
+    foreach ($k in $params.keys) {
+        if ($params[$k] -is [Period]) {
+            $params[$k] = $params[$k].tostring()
+        }
+    }
 
     $val = [pscustomobject]@{
         Function = $Name
-        Date     = $date#.tostring('yyyy-MM-dd HH:mm:ss.') + $date.Millisecond.tostring().PadLeft(3, '0')
+        Date     = $date.tostring('O')
         Params   = $params
     }
     $content += @($val)
-    $content | ConvertTo-Json -AsArray -EnumsAsStrings -Depth 3 | Out-File -FilePath $destination
+    $content | ConvertTo-Json -Depth 3 | Out-File -FilePath $destination
 }

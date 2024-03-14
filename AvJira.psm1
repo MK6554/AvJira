@@ -3,7 +3,7 @@ trap {
     Pop-Location 
     break 
 }
-Import-Module JiraPs -ea Stop
+Import-Module JiraPs
 # Join-Path works differently on 5, otherwise would have used it
 $dirSep = [System.IO.Path]::DirectorySeparatorChar
 $moduleName = $MyInvocation.MyCommand.Name -replace '\.ps.1', ''

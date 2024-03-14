@@ -5,6 +5,7 @@ param (
     $PS5
 )
 $commands = '$psversiontable.PSversion;(Measure-Command{ipmo ./AvJira.psd1 -verbose}).TotalSeconds'
+$env:PSModulePath=$null
 if ($PS5.IsPresent) {
     powershell -noexit -noprofile -command $commands
 } else {
