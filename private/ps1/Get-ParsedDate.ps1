@@ -3,15 +3,18 @@ function Get-ParsedDate {
     param (
         [Parameter()]
         [System.Nullable[datetime]]
-        $Date
+        $Date,
+        [Parameter()]
+        [timespan]
+        $TimeSpent
     )
     if ($Date) {
         return $Date
     }
-    $now = [datetime]::now
+    $now = [datetime]::now - $TimeSpent
     $converter = [JiraDateTimeConverterAttribute]::new()
     while ($true) {
-        $temp = Read-Host "Enter date of work (leave empty to use current date: $now))"
+        $temp = Read-Host "Enter date of work (leave empty to use current date minus time spent: $now))"
         if ($temp -match '^\s*$') {
             # empty string
             $Date = $now

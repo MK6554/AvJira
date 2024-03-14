@@ -42,7 +42,7 @@ function Add-AvJiraWorklog {
     $interactive = -not $time -or -not $Issue -or -not $date
     $Time = Get-ParsedTime $Time
     
-    $Date = Get-ParsedDate $Date
+    $Date = Get-ParsedDate $Date $Time
     
     while (-not $issue) {
         $Issue = Read-Host 'Enter issue ID'
