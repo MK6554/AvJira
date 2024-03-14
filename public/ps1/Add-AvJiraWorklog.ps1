@@ -65,6 +65,7 @@ function Add-AvJiraWorklog {
     if ($PSCmdlet.ShouldContinue('Do you want to add this log?', $logStr) -or $force.IsPresent) {
         Get-AvJiraSession
         Add-JiraIssueWorklog @log  
+        Update-Biedametry $MyInvocation.MyCommand.Name $PSBoundParameters
     }
     Write-Log "$($MyInvocation.MyCommand.Name) finished."
 }

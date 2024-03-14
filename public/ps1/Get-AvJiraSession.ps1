@@ -10,6 +10,7 @@ function Get-AvJiraSession {
     }
     $session = Get-JiraSession
     if (-not $session) {
+        Update-Biedametry $MyInvocation.MyCommand.Name
         if ($PSVersionTable.PSVersion.Major -ge 6) {
             Start-Sleep -Milliseconds 200 # to ensure that progress bar shows up
         }

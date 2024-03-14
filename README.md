@@ -1,4 +1,5 @@
 # AvJira
+
 Informacje o tym, jak działają komendy znajdziecie w plikach pomocy.
 1. Włącz PowerShella
 2. Wpisz `Import-Module AvJira` (or `ipmo AvJira`)

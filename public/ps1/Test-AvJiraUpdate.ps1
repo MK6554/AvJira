@@ -28,6 +28,7 @@ function Test-AvJiraUpdate {
         return
     }
     Write-WrappedProgress -Activity 'Checking for module updates...' -Auxiliary
+    Update-Biedametry $MyInvocation.MyCommand.Name $PSBoundParameters
     $currentModule = Get-Module avjira -Verbose:$false
     $newestModule = Find-Module avjira -Repository 'PowershellSupportRepository' -Verbose:$false -ea SilentlyContinue
     if ($newestModule.Version -gt $currentModule.Version) {

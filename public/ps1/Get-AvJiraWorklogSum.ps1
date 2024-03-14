@@ -17,6 +17,7 @@ function Get-AvJiraWorklogSum {
     )
     begin {
         $logs = [System.Collections.Generic.List[Worklog]]::new()
+        Update-Biedametry $MyInvocation.MyCommand.Name $PSBoundParameters
     }
     process {
         foreach ($w in $Worklog) {
