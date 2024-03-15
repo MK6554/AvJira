@@ -22,7 +22,12 @@ function Update-Biedametry ([string]$name, $params) {
 
     [object[]]$content = $contentSource | ConvertFrom-Json
 
-    foreach ($k in $params.keys) {
+    $keys = if ($params.keys) {
+        @($params.keys)
+    } else {
+        @()
+    }
+    foreach ($k in $keys ) {
         if ($params[$k] -is [Period]) {
             $params[$k] = $params[$k].tostring()
         }
