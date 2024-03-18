@@ -31,6 +31,7 @@ function Get-AvJiraWorklog {
         [string[]]
         $User,
         [Parameter(ParameterSetName = 'ISSUE', ValueFromPipelineByPropertyName)]
+        [ALias('Key')]
         [object[]]
         $Issue
     )

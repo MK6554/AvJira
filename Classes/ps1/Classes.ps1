@@ -89,7 +89,7 @@ class Issue {
         return $false
     }
 
-    [int]GetHashcode(){
+    [int]GetHashcode() {
         return $this.Key.GetHashCode()
     }
 
@@ -136,6 +136,7 @@ class Person {
 }
 class SummedWorklogs {
     hidden [Worklog[]]$Worklogs
+    [string]$Header
     [timespan]$TimeSpentTotal
     [int]$WorklogCount
     [string[]]$Issue
@@ -166,7 +167,8 @@ class SummedWorklogs {
         [SummedWorklogs]::MembersAdded = $true
     }
 
-    SummedWorklogs([Worklog[]]$logs) {
+    SummedWorklogs([Worklog[]]$logs, [string]$Header) {
+        $this.Header = $Header
         $this.Worklogs = $logs
         $this.TimeSpentTotal = $logs | Measure-Object -Sum -Property TimeSpentSeconds | ForEach-Object { [timespan]::FromSeconds([int]($_.Sum)) }
         $this.Issue = $logs | ForEach-Object { $_.Issue.FullName } | Select-Object -Unique
