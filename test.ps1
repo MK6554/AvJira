@@ -1,2 +1,3 @@
-ipmo .\AvJira.psd1 -Force
-Test-AvJiraUpdate
+Import-Module .\AvJira.psd1 -Force
+$a = get-avjiraworklog thisyear 
+$a | logsum month
