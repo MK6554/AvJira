@@ -79,9 +79,24 @@ class Issue {
         [Issue]::AddMembers()
 
     }
+    [bool]Equals([object]$other) {
+        if ($null -eq $other) {
+            return $false
+        }
+        if ($other -is [Issue]) {
+            return $this.Key -eq $other.Key
+        }
+        return $false
+    }
+
+    [int]GetHashcode(){
+        return $this.Key.GetHashCode()
+    }
+
     [string]ToString() {
         return $this.FullName
     }
+    
     [string]Crop([int]$Length) {
         if ($this.FullName.Length -le $Length - 1) {
             return $this.FullName
@@ -163,7 +178,6 @@ class Worklog {
     [datetime]$Started
     [datetime]$Created
     [timespan]$TimeSpent
-    [int]$TimeSpentSeconds
     [string]$Comment
     [Person]$Author
 
@@ -175,6 +189,18 @@ class Worklog {
                 MemberName = 'TimeSpentSeconds'
                 MemberType = 'ScriptProperty'
                 Value      = { $this.TimeSpent.TotalSeconds }
+            }, @{
+                MemberName = 'Month'
+                MemberType = 'ScriptProperty'
+                Value      = { $this.Started.Month }
+            }, @{
+                MemberName = 'Year'
+                MemberType = 'ScriptProperty'
+                Value      = { $this.Started.Year }
+            }, @{
+                MemberName = 'Day'
+                MemberType = 'ScriptProperty'
+                Value      = { $this.Started.Day }
             }
         )
         $TypeName = [Worklog].Name
@@ -262,7 +288,7 @@ class JiraTimeSpanConverterAttribute:System.Management.Automation.ArgumentTransf
         )
         [timespan]$result = 0
         $inputStr = $inputData -replace '[^hHmM\d:]', '' # remove everything that is not a number or h/m
-        $inputStr = $inputStr -replace '(?<!\d)\d(?!\d)','0$0' # find all digits, which do NOT have a leading digit and do NOT have a following digit
+        $inputStr = $inputStr -replace '(?<!\d)\d(?!\d)', '0$0' # find all digits, which do NOT have a leading digit and do NOT have a following digit
         # in short - find all single digits - replace them by adding a leading zero
         $inputStr = $inputStr.ToLower()
         if ([timespan]::TryParseExact($inputStr, $formats, $null, [ref]$result)) {
