@@ -12,6 +12,7 @@ enum Period {
 
 class Issue {
     hidden [pscustomobject] $sourceObject
+    hidden [Issue]$Issue
     [string]$Key
     [string]$Summary
     [Person]$Reporter
@@ -75,7 +76,7 @@ class Issue {
         $this.Link = [uri]::new($jiraIssueObject.HttpUrl)
         $this.WorklogCount = if ($jiraIssueObject.worklog -is [object[]]) { $jiraIssueObject.worklog.count }else { $jiraIssueObject.worklog.Total }
         $this.CommentCount = if ($jiraIssueObject.comment -is [object[]]) { $jiraIssueObject.comment.count }else { $jiraIssueObject.comment.Total }
-
+        $this.Issue = $this
         [Issue]::AddMembers()
 
     }
