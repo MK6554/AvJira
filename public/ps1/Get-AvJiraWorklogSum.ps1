@@ -70,10 +70,22 @@ function Get-AvJiraWorklogSum {
     }
     end {
         if ($Groupby) {
+            $GroupBy = $GroupBy | ForEach-Object { Get-CapitalizedString $_ }
+            if ($GroupBy -contains 'Month' -and $GroupBy -notcontains 'Year') {
+                $GroupByList = [System.Collections.ArrayList]::new($GroupBy)
+                $index = $GroupByList.IndexOf('Month')
+                $null = $GroupByList.Insert($index, 'Year')
+                $groupby = $GroupByList
+            }
             # if user want to group, group by the specified property and return summ for each group.
             $groups = $singleItemList | Sort-Object Started | Group-Object $GroupBy
             foreach ($g in $Groups) {
-                [SummedWorklogs]::new($g.Group, (Find-WorklogGroupingObject $g.Group -groupingValue $g.Name ))
+                $formatted = foreach ($singleGroupBy in $GroupBy) {
+                    $valueInGroup = $g.Group.$singleGroupBy | Select-Object -Unique
+                    Format-GroupName $singleGroupBy $valueInGroup
+                }
+                $header = "$($GroupBy -join ', '): $($formatted -join ' - ')"
+                [SummedWorklogs]::new($g.Group, $header)
             }
         } elseif ($singleItemList) {
             # return sum of all logs.
