@@ -38,12 +38,11 @@ function Get-AvJiraWorklog {
         $null = Get-AvJiraSession
         $local:outside_checkPerformed = $true # will skip session test for any subcommands
         $null = $local:outside_checkPerformed # to silence warnings about unused variable
-        Update-Biedametry $MyInvocation.MyCommand.Name $PSBoundParameters
-
+        
     }
     process {
+        Update-Biedametry $MyInvocation.MyCommand.Name $PSBoundParameters
         $issueMode = $PSCmdlet.ParameterSetName -eq 'ISSUE'
-        $periodMode = -not $issueMode
         $issueParams = @{}
 
         if ($null -eq $period) {

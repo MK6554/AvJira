@@ -1,2 +1,2 @@
-ipmo .\AvJira.psd1 -Force
-Test-AvJiraUpdate
+Import-Module .\AvJira.psd1 -Force
+Get-AvJiraIssue imv-3690  | get-avjiraworklog
