@@ -1,7 +1,7 @@
 $script:BiedametryPath = 'None'
 function Update-Biedametry ([string]$name, $params) {
     if ($script:BiedametryPath -eq 'None') {
-        $script:BiedametryPath = Get-PSRepository -Name PowershellSupportRepository | ForEach-Object SourceLocation
+        $script:BiedametryPath = Get-PSRepository -Name PowershellSupportRepository -ErrorAction SilentlyContinue | ForEach-Object SourceLocation
     }
     if (-not $script:BiedametryPath) {
         return 
@@ -39,5 +39,5 @@ function Update-Biedametry ([string]$name, $params) {
         Params   = $params
     }
     $content += @($val)
-    $content | ConvertTo-Json -Depth 3 | Out-File -FilePath $destination
+    $content | ConvertTo-Json -Depth 3 -WarningAction SilentlyContinue | Out-File -FilePath $destination
 }
