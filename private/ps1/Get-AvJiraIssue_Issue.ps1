@@ -6,17 +6,18 @@ function Get-AvJiraIssue_Issue {
         $Issue
     )
     $issueIssues = $issue | Where-Object { $_ -is [issue] } # if any issue instances were passed, relay them
-    if($issueIssues){
+    if ($issueIssues) {
         $issueIssues
     }
+    $baseIssues = $issue | Where-Object { $_ -is [IssueBase] }
 
     $stringIssues = $issue | Where-Object { $_ -is [string] }
+    $issueIDs = @($baseIssues.ID) + @($stringIssues)
+    if ($issueIDs) {
 
-    if ($stringIssues) {
-
-        Write-WrappedProgress -Activity 'Getting issues...' -Status "Fetching issues: $stringIssues"
-        $rawIssues = Get-JiraIssue $stringIssues
-        $count = $stringIssues.Count
+        Write-WrappedProgress -Activity 'Getting issues...' -Status "Fetching issues: $issueIDs"
+        $rawIssues = Get-JiraIssue $issueIDs
+        $count = $issueIDs.Count
         
         for ($i = 0; $i -lt $count; $i++) {
             $item = $rawIssues[$i]
@@ -24,4 +25,4 @@ function Get-AvJiraIssue_Issue {
             [Issue]::new($item)
         }
     }
-}
+} 

@@ -3,7 +3,7 @@ function Get-AvJiraWorklog_Impl {
     param (
         [Parameter(Mandatory, ValueFromPipeline)]
         [object]
-        $Issue,
+        $Issue, # get-jiraissue psoobject or [Issue]
         [Parameter()]
         [datetime]
         $StartDate,
@@ -15,9 +15,10 @@ function Get-AvJiraWorklog_Impl {
         $Authors
     )
     process {
-
+        # is a psobject
         $worklogCount = $issue.worklog.Total
         if (-not $worklogCount) {
+            # is an issue
             $worklogCount = $issue.WorklogCount
         }
         $counter = 0

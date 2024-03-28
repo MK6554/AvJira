@@ -10,19 +10,42 @@ enum Period {
     AllTime = 8
 }
 
-class Issue {
+class IssueBase {
     hidden [pscustomobject] $sourceObject
     hidden [Issue]$Issue
     [string]$Key
     [string]$Summary
+    [string[]]$Status
+    IssueBase([pscustomobject]$jiraIssueObject) {
+        $this.sourceObject = $jiraIssueObject
+        $this.Key = $jiraIssueObject.Key
+        $this.Summary = $jiraIssueObject.Summary
+        $this.Issue = $this
+        $this.Status = [string[]]$jiraIssueObject.Status
+    }
+    IssueBase([string]$key, [string]$summary, [string[]]$status) {
+        $this.sourceObject = $null
+        $this.Key = $key
+        $this.Summary = $summary
+        $this.Issue = $this
+        $this.Status = $status
+    }
+}
+
+class Issue : IssueBase {
+    # hidden [pscustomobject] $sourceObject
+    # hidden [Issue]$Issue
+    # [string]$Key
+    # [string]$Summary
+    # [string[]]$Status
     [Person]$Reporter
     [Person]$Creator
     [Person]$Asignee
-    [string[]]$Status
     [datetime]$Created
     [datetime]$Updated
     [timespan]$TimeSpentAggregate
     [timespan]$TimeSpent
+    [Issue[]]$Subtasks
     [uri]$Link
     hidden [int]$WorklogCount
     hidden [int]$CommentCount
@@ -56,17 +79,11 @@ class Issue {
         [Issue]::MembersAdded = $true
     }
 
-    Issue([pscustomobject]$jiraIssueObject) {
-        $this.sourceObject = $jiraIssueObject
-
-        $this.Key = $jiraIssueObject.Key
-        $this.Summary = $jiraIssueObject.Summary
-
+    Issue([pscustomobject]$jiraIssueObject):base($jiraIssueObject) {
         $this.Reporter = [Person]::new($jiraIssueObject.Reporter)
         $this.Creator = [Person]::new($jiraIssueObject.Creator)
         $this.Asignee = [Person]::new($jiraIssueObject.Assignee)
 
-        $this.Status = [string[]]$jiraIssueObject.Status
         $this.Created = $jiraIssueObject.Created
         $this.Updated = $jiraIssueObject.Updated
 
@@ -76,7 +93,11 @@ class Issue {
         $this.Link = [uri]::new($jiraIssueObject.HttpUrl)
         $this.WorklogCount = if ($jiraIssueObject.worklog -is [object[]]) { $jiraIssueObject.worklog.count }else { $jiraIssueObject.worklog.Total }
         $this.CommentCount = if ($jiraIssueObject.comment -is [object[]]) { $jiraIssueObject.comment.count }else { $jiraIssueObject.comment.Total }
-        $this.Issue = $this
+        $this.Subtasks = $jiraIssueObject.Subtasks | ForEach-Object { [IssueBase]::new(
+                $_.ID,
+                $_.fields.summary,
+                $_.fields.status
+                ) }
         [Issue]::AddMembers()
 
     }
