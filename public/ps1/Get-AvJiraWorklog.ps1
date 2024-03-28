@@ -32,7 +32,10 @@ function Get-AvJiraWorklog {
         $User,
         [Parameter(ParameterSetName = 'ISSUE', ValueFromPipelineByPropertyName)]
         [object[]]
-        $Issue
+        $Issue,
+        [Parameter(ParameterSetName='ISSUE')]
+        [switch]
+        $NoSubtasks
     )
     begin {
         $null = Get-AvJiraSession
@@ -55,6 +58,7 @@ function Get-AvJiraWorklog {
         if ($issueMode) {
             
             $issueParams['Issue'] = $Issue
+            $issueParams['Subtasks'] = -not $NoSubtasks.IsPresent
             
         } else {
             #periodMode
@@ -81,6 +85,7 @@ function Get-AvJiraWorklog {
 
             $issueParams['Query'] = $query
         }
+        # Get-AvJiraIssue will behave differently depending on input parameters
         $worklogs = Get-AvJiraIssue @issueParams | Get-AvJiraWorklog_Impl -StartDate $startDate -EndDate $endDate -Author $User | Sort-Object Started -Descending
         $worklogs | Tee-Object -Variable Global:AvJiraLastOutput
     }

@@ -32,7 +32,11 @@ function Get-AvJiraIssue {
         $Assignee,
         [Parameter(ParameterSetName = 'QUERY')]
         [string[]]
-        $Status
+        $Status,
+        [Parameter(ParameterSetName='KEY')]
+        [Alias('WithSubtasks')]
+        [switch]
+        $Subtasks
     )
     begin {
 
@@ -46,8 +50,11 @@ function Get-AvJiraIssue {
     process {
 
         if ($PSCmdlet.ParameterSetName -eq 'KEY') {
-
-            Get-AvJiraIssue_Issue $Issue | Tee-Object -Variable Global:AvJiraLastOutput
+            $params =@{
+                Issue = $Issue
+                NoSubtasks = -not $Subtasks.IsPresent
+            }
+            Get-AvJiraIssue_Issue @params | Tee-Object -Variable Global:AvJiraLastOutput
 
         } else {
             $params = @{
