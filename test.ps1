@@ -1,2 +1,2 @@
 Import-Module .\AvJira.psd1 -Force
-Get-AvJiraIssue avp-404 -Subtasks
+Get-AvJiraWorklog -i avp-260
