@@ -48,7 +48,7 @@ function Get-AvJiraIssue {
 
     }
     process {
-
+    $a = Get-AvJiraIssue_Issue @params
         if ($PSCmdlet.ParameterSetName -eq 'KEY') {
             $params =@{
                 Issue = $Issue

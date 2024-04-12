@@ -24,16 +24,13 @@ function Get-AvJiraIssue_Issue {
     # return issue instances without processing
     do {
         $toFetch = $issuesToReturn.GetEnumerator() | Where-Object Value -EQ $null | Select-Object -ExpandProperty Key
-        Write-Host "Fetching $($toFetch.Count) issues: $tofetch"
         Write-WrappedProgress -Activity 'Getting issues...' -Status "Fetching issues: $toFetch"
         $newIssues = [System.Collections.ArrayList]::new()
         if ($toFetch) {
             Write-debug "Fetching $tofetch"
             Get-JiraIssue $toFetch | 
                 ForEach-Object {
-                    Write-debug "Fetching $($_.key)"
                     $node = [Issue]::new($_) 
-                    Write-Debug "Adding $_"
                     $null = $newIssues.Add($node)
                 }
         }
@@ -41,17 +38,12 @@ function Get-AvJiraIssue_Issue {
             $issuesToReturn[$_.Key] = $_
         }
         $allSubtasks = if ($NoSubtasks.IsPresent) { @() }else { @($issuesToReturn.Values.Subtasks.Key) }
-        Write-Host "There are $($allSubtasks.count) subtasks: $allSubtasks"
         foreach ($subtask in $allSubtasks) {
             if (-not [string]::IsNullOrWhiteSpace($subtask) -and -not $issuesToReturn.ContainsKey($subtask)) {
-                Write-Host "adding|$subtask|"
                 $issuesToReturn[$subtask] = $null
             }
         }
         $hasAllInstances = @($issuesToReturn.GetEnumerator() | Where-Object Value -EQ $null).Count -eq 0
-        Write-Host "Missing $(@($issuesToReturn.GetEnumerator() | Where-Object Value -EQ $null).Count))"
-        Write-Host "$HasAll  $hasallinstances"
-        #$issuesToReturn.Values.Subtasks.Key | Write-Host
     } until ($hasAllInstances )
 
     $listToReturn = @($issuesToReturn.Values)

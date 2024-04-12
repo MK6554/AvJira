@@ -86,6 +86,9 @@ function Get-AvJiraWorklog {
             $issueParams['Query'] = $query
         }
         # Get-AvJiraIssue will behave differently depending on input parameters
+        #$a = Get-AvJiraIssue @issueParams
+        #$i = $a | get-AvJiraWorklog_Impl -StartDate $startDate -EndDate $endDate -Author $User
+        #$worklogs = $i | Sort-Object Started -Descending
         $worklogs = Get-AvJiraIssue @issueParams | Get-AvJiraWorklog_Impl -StartDate $startDate -EndDate $endDate -Author $User | Sort-Object Started -Descending
         $worklogs | Tee-Object -Variable Global:AvJiraLastOutput
     }

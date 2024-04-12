@@ -21,6 +21,10 @@ function Get-AvJiraWorklog_Impl {
             # is an issue
             $worklogCount = $issue.WorklogCount
         }
+        if($worklogCount -le 0){
+            # PowerShell 5 will bug out when fetching worklogs of issue with no worlogs, here we skip it.
+            return
+        }
         $counter = 0
         if (-not $EndDate) {
             $EndDate = [datetime]::MaxValue
