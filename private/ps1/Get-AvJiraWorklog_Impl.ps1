@@ -3,7 +3,7 @@ function Get-AvJiraWorklog_Impl {
     param (
         [Parameter(Mandatory, ValueFromPipeline)]
         [object]
-        $Issue,
+        $Issue, # get-jiraissue psoobject or [Issue]
         [Parameter()]
         [datetime]
         $StartDate,
@@ -15,10 +15,15 @@ function Get-AvJiraWorklog_Impl {
         $Authors
     )
     process {
-
+        # is a psobject
         $worklogCount = $issue.worklog.Total
         if (-not $worklogCount) {
+            # is an issue
             $worklogCount = $issue.WorklogCount
+        }
+        if($worklogCount -le 0){
+            # PowerShell 5 will bug out when fetching worklogs of issue with no worlogs, here we skip it.
+            return
         }
         $counter = 0
         if (-not $EndDate) {
